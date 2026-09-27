@@ -1,0 +1,15 @@
+# Copy into each repo's root, replacing projectKey.
+# SonarQube's Go sensor reads coverage.out natively — no conversion step.
+
+sonar.projectKey=your-org_REPLACE_WITH_REPO_NAME
+sonar.organization=your-org
+
+sonar.sources=.
+sonar.exclusions=**/*_test.go,**/mocks/**,**/gen/**,**/vendor/**
+sonar.tests=.
+sonar.test.inclusions=**/*_test.go
+
+sonar.go.coverage.reportPaths=coverage.out
+
+# New-code coverage is what the Quality Gate should check for existing repos
+# with legacy debt; see references/sonarqube-setup.md for why.

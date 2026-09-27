@@ -1,0 +1,44 @@
+# .github/workflows/test-and-scan.yml
+# Copy into each Go repo, or convert into a reusable workflow called by all
+# repos (recommended — see SKILL.md step 4).
+
+name: test-and-scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # SonarQube needs full history for new-code detection
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Run tests with coverage
+        run: |
+          go test $(go list ./... | grep -v /mocks/ | grep -v /gen/) \
+            -coverprofile=coverage.out -covermode=atomic
+
+      # Optional fast local gate before SonarQube — see testcoverage.yml.template
+      - name: Check per-file coverage threshold
+        uses: vladopajic/go-test-coverage@v2
+        with:
+          config: ./.testcoverage.yml
+        continue-on-error: false
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # Require this check in branch protection rules so the gate actually
+      # blocks merge — a passing scan step with no required-check setting is
+      # just a dashboard, not enforcement.

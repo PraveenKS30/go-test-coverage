@@ -1,0 +1,15 @@
+# .testcoverage.yml — used by vladopajic/go-test-coverage as a fast,
+# local/PR-time check before the SonarQube round-trip. Not a replacement for
+# the SonarQube gate — a cheaper first line of defense.
+
+profile: coverage.out
+
+threshold:
+  file: 80
+  package: 80
+  total: 80
+
+exclude:
+  paths:
+    - mocks/
+    - gen/
